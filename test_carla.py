@@ -194,7 +194,7 @@ def nuke_obstacles_in_zone(world, center_loc, fwd_vec, length):
         if obj.type in [carla.CityObjectLabel.Poles, carla.CityObjectLabel.GuardRail, 
                        carla.CityObjectLabel.Fences, carla.CityObjectLabel.Walls,
                        carla.CityObjectLabel.TrafficSigns, carla.CityObjectLabel.TrafficLight,
-                       carla.CityObjectLabel.Other]:  # Catches existing barriers
+                       carla.CityObjectLabel.Other]:  
             
             obj_loc = obj.transform.location
             
@@ -240,7 +240,7 @@ def clear_all_highway_obstacles(world):
                        carla.CityObjectLabel.TrafficSigns,
                        carla.CityObjectLabel.Fences,
                        carla.CityObjectLabel.Walls,
-                       carla.CityObjectLabel.Other]:  # Existing barriers
+                       carla.CityObjectLabel.Other]:  
             ids_to_remove.append(obj.id)
     
     if ids_to_remove:
@@ -458,12 +458,12 @@ class ConcreteMedian:
         for wp in waypoints_path:
             if wp.is_junction:
                 print(f"Skipping junction at waypoint (intersection detected)")
-                continue  # Skip this waypoint - don't place barrier at intersections
+                continue
             
             yaw_rad = math.radians(wp.transform.rotation.yaw)
             right_vec = carla.Vector3D(-math.sin(yaw_rad), math.cos(yaw_rad), 0)
             
-            # Shift to center of road (between 3 forward and 3 backward lanes)
+            # Shift to center of road
             center_offset = -10.5  # 3 lanes × 3.5m = 10.5m left
             
             center_loc = carla.Location(
@@ -500,14 +500,14 @@ class ConcreteMedian:
     def set_lane_configuration(self, mode, center_wp=None, right_vec=None):
         """Mode 0: 3-3 lanes, Mode 1: 4-2 lanes (left), Mode 2: 2-4 lanes (right)"""
         if mode == 1:
-            self.target_offset = -3.5  # Shift left to create 4th forward lane
+            self.target_offset = -3.5 
             self.is_moving = True
             print("Shifting median left: creating 4-2 configuration (4 forward lanes)")
             self.destroy_lane4_markers()
             if center_wp and right_vec:
                 self.lane4_markers = create_virtual_lane4(self.world, center_wp, mode, right_vec)
         elif mode == 2:
-            self.target_offset = 3.5   # Shift right to create 4th backward lane
+            self.target_offset = 3.5   
             self.is_moving = True
             print("Shifting median right: creating 2-4 configuration (4 backward lanes)")
             self.destroy_lane4_markers()
@@ -690,11 +690,11 @@ def spawn_aligned_traffic(client, world, center_wp, tm):
             tm.auto_lane_change(v, True)
             tm.ignore_lights_percentage(v, 100)
             tm.ignore_signs_percentage(v, 100)
-            tm.distance_to_leading_vehicle(v, random.uniform(2.0, 3.5))  # Varied spacing encourages lane changes
+            tm.distance_to_leading_vehicle(v, random.uniform(2.0, 3.5))  
             tm.vehicle_percentage_speed_difference(v, random.uniform(10, 40))
             if random.random() < 0.3:
-                tm.vehicle_percentage_speed_difference(v, -10.0)  # 10% faster than speed limit
-                tm.distance_to_leading_vehicle(v, 3.5)  # More space to maneuver
+                tm.vehicle_percentage_speed_difference(v, -10.0) 
+                tm.distance_to_leading_vehicle(v, 3.5) 
             cars.append(v)
             
     print(f"Spawned {len(cars)} vehicles")
@@ -731,13 +731,13 @@ def create_virtual_lane4(world, center_wp, mode, right_vec):
             try:
                 if mode == 1:  # 4-2 mode: lane 4 is at -14m (4 lanes * 3.5m)
                     lane4_offset = -14.0
-                else:  # 2-4 mode: lane 4 is at +14m
+                else:  
                     lane4_offset = 14.0
                 
                 marker_loc = current_wp.transform.location
                 marker_loc.x += right_vec.x * lane4_offset
                 marker_loc.y += right_vec.y * lane4_offset
-                marker_loc.z -= 10.0  # Place underground so invisible but exists
+                marker_loc.z -= 10.0 
                 
                 marker_transform = carla.Transform(marker_loc, current_wp.transform.rotation)
                 marker = world.try_spawn_actor(marker_bp, marker_transform)
@@ -778,13 +778,9 @@ def force_vehicles_to_lane4(vehicles, center_wp, right_vec, fwd_vec):
             dy = v_loc.y - center_wp.transform.location.y
             lateral_offset = (dx * right_vec.x) + (dy * right_vec.y)
             
-            # Calculate forward/backward position (distance along the road)
             forward_offset = (dx * fwd_vec.x) + (dy * fwd_vec.y)
             
-            # Check if vehicle is in RIGHT lanes 1, 2, or 3 (offset -1.75 to -10.5m)
-            # Lane -1: -1.75m, Lane -2: -5.25m, Lane -3: -8.75m
-            if -11.0 < lateral_offset < -0.5:  # In lanes 1, 2, or 3
-                # Move vehicle to lane 4 laterally (0.0m offset) but keep forward position
+            if -11.0 < lateral_offset < -0.5: 
                 new_loc = carla.Location(
                     x=center_wp.transform.location.x + (fwd_vec.x * forward_offset),
                     y=center_wp.transform.location.y + (fwd_vec.y * forward_offset),
@@ -815,11 +811,9 @@ def spawn_lane4_vehicles(client, world, center_wp, tm, vehicles, mode, right_vec
     vehicle_bps = [x for x in vehicle_bps if int(x.get_attribute('number_of_wheels')) == 4]
     
     spawned = 0
-    
-    # Start FAR BEHIND the camera view so vehicles drive INTO view naturally
-    # Go back 300m before camera
+
     start_wp = center_wp
-    for _ in range(60):  # Go back 300m (60 * 5m steps)
+    for _ in range(60): 
         prev_wps = start_wp.previous(5.0)
         if prev_wps:
             start_wp = prev_wps[0]
@@ -828,8 +822,7 @@ def spawn_lane4_vehicles(client, world, center_wp, tm, vehicles, mode, right_vec
     
     current_wp = start_wp
     
-    # Spawn vehicles from far behind camera position
-    for i in range(60):  # 300m section (far behind camera)
+    for i in range(60): 
         if not current_wp or current_wp.is_junction:
             next_wps = current_wp.next(5.0) if current_wp else None
             if next_wps:
@@ -837,41 +830,34 @@ def spawn_lane4_vehicles(client, world, center_wp, tm, vehicles, mode, right_vec
             continue
         
         try:
-            if mode == 1:  # 4-2 mode: spawn in lane -4 (4th forward lane, rightmost)
-                # Lane -4 is the rightmost forward lane on RIGHT side
-                # RIGHT side lanes: -1 (inner), -2, -3, -4 (outer)
-                # Lane -4 center is at approximately -12.25m (negative = RIGHT side)
+            if mode == 1: 
                 
                 yaw_rad = math.radians(current_wp.transform.rotation.yaw)
                 fwd = carla.Vector3D(math.cos(yaw_rad), math.sin(yaw_rad), 0)
                 right = carla.Vector3D(-fwd.y, fwd.x, 0)
                 
-                # The 4th lane is the NEW lane in the space between yellow median lines
-                # This is where the median used to be - offset 0.0m (center of road)
-                # In photo: labeled as "3" (yellow) between the two yellow median lines
                 lane4_offset = 0.0  # Center of road - the space between yellow median lines (4th forward lane)
                 
                 spawn_loc = current_wp.transform.location
                 spawn_loc.x += right.x * lane4_offset
                 spawn_loc.y += right.y * lane4_offset
                 spawn_loc.z += 0.5
-                
-                # FORWARD direction (RED arrow - same as waypoint direction)
+
                 spawn_transform = carla.Transform(spawn_loc, current_wp.transform.rotation)
                 
-                if random.random() < 0.6:  # 60% spawn rate
+                if random.random() < 0.6: 
                     bp = random.choice(vehicle_bps)
                     vehicle = world.try_spawn_actor(bp, spawn_transform)
                     
                     if vehicle:
                         vehicle.set_autopilot(True, tm.get_port())
                         # ENABLE lane changes to reduce congestion
-                        tm.auto_lane_change(vehicle, True)  # Allow lane changes
+                        tm.auto_lane_change(vehicle, True) 
                         tm.ignore_lights_percentage(vehicle, 100)
                         tm.ignore_signs_percentage(vehicle, 100)
-                        tm.distance_to_leading_vehicle(vehicle, random.uniform(2.5, 4.0))  # Closer following
+                        tm.distance_to_leading_vehicle(vehicle, random.uniform(2.5, 4.0))  
                         tm.vehicle_percentage_speed_difference(vehicle, random.uniform(-30, -10))
-                        tm.keep_right_rule_percentage(vehicle, 70)  # Prefer right but can change lanes
+                        tm.keep_right_rule_percentage(vehicle, 70) 
                         vehicles.append(vehicle)
                         spawned += 1
             
@@ -928,7 +914,6 @@ def draw_virtual_lane4_boundaries(world, center_wp, mode, right_vec):
     start_loc = center_wp.transform.location
     
     if mode == 1:  # 4-2 mode (Lane 4 is on the left, approx -14m)
-        # Inner boundary (shared with lane 3)
         inner_offset = -10.5
         # Outer boundary (edge of road)
         outer_offset = -14.0
@@ -937,7 +922,7 @@ def draw_virtual_lane4_boundaries(world, center_wp, mode, right_vec):
         outer_offset = 14.0
         
     current_wp = center_wp
-    for i in range(int(SECTION_LENGTH / 5)):  # Every 5 meters
+    for i in range(int(SECTION_LENGTH / 5)): 
         if current_wp.is_junction:
             next_wps = current_wp.next(5.0)
             if next_wps: current_wp = next_wps[0]
@@ -986,8 +971,8 @@ def analyze_traffic(world, vehicles, center_wp, fwd_vec, right_vec, median_posit
     start_loc = center_wp.transform.location
     
     lane_vehicles = {
-        'forward': [[], [], [], []],  # 4 possible forward lanes
-        'backward': [[], [], [], []]  # 4 possible backward lanes (even if not all used)
+        'forward': [[], [], [], []],  
+        'backward': [[], [], [], []]  
     }
     
     for v in vehicles:
@@ -1018,17 +1003,17 @@ def analyze_traffic(world, vehicles, center_wp, fwd_vec, right_vec, median_posit
                 elif -7 <= relative_offset < -3.5:
                     lane_vehicles['forward'][2].append(speed_kmh)  # Lane 3
                 elif -3.5 <= relative_offset < 0:
-                    lane_vehicles['forward'][3].append(speed_kmh)  # Lane 4 (leftmost, nearest median)
+                    lane_vehicles['forward'][3].append(speed_kmh)  # Lane 4
             else:
                 relative_offset = lateral_offset - median_position
                 if 0 <= relative_offset < 3.5:
-                    lane_vehicles['backward'][0].append(speed_kmh)  # Lane 1 (nearest median)
+                    lane_vehicles['backward'][0].append(speed_kmh)  # Lane 1
                 elif 3.5 <= relative_offset < 7:
                     lane_vehicles['backward'][1].append(speed_kmh)  # Lane 2
                 elif 7 <= relative_offset < 10.5:
                     lane_vehicles['backward'][2].append(speed_kmh)  # Lane 3
                 elif relative_offset >= 10.5:
-                    lane_vehicles['backward'][3].append(speed_kmh)  # Lane 4 (leftmost)
+                    lane_vehicles['backward'][3].append(speed_kmh)  # Lane 4 
         except:
             continue
     
@@ -1071,7 +1056,7 @@ def main():
     print(" Congestion-Based Lane Management")
     print("="*60)
     
-    # Load Town05 (has proper 6-lane highways) or use current map
+    # Load Town05
     try:
         print("\nLoading Town05...")
         world = client.load_world('Town05')
@@ -1088,12 +1073,12 @@ def main():
     
     tm = client.get_trafficmanager(8000)
     tm.set_synchronous_mode(True)
-    tm.global_percentage_speed_difference(20.0)  # Slower traffic for congestion
-    tm.set_global_distance_to_leading_vehicle(2.5)  # More spacing allows lane changes
-    tm.set_hybrid_physics_mode(True)  # Better performance
-    tm.set_hybrid_physics_radius(70.0)  # Physics detail radius
-    tm.set_random_device_seed(int(time.time()))  # Random behavior for natural traffic
-    tm.set_respawn_dormant_vehicles(False)  # Don't respawn vehicles that go "off-road"
+    tm.global_percentage_speed_difference(20.0)  
+    tm.set_global_distance_to_leading_vehicle(2.5) 
+    tm.set_hybrid_physics_mode(True) 
+    tm.set_hybrid_physics_radius(70.0) 
+    tm.set_random_device_seed(int(time.time()))  # Random behavior for atural traffic
+    tm.set_respawn_dormant_vehicles(False)  
     print("Traffic Manager configured for 4-lane operation")
 
     pygame.init()
@@ -1192,7 +1177,7 @@ def main():
             
             median.enforce_separation(vehicles, tm)
             
-            if int(elapsed_time * 2) % 2 == 0:  # Update display
+            if int(elapsed_time * 2) % 2 == 0: 
                 display.fill((20, 20, 40))
                 if mode == 1:
                     mode_text = "MODE: 4-2 Lanes (LEFT SHIFT) - LANE 4 ACTIVE"
@@ -1249,18 +1234,18 @@ def main():
                     'backward_speed': avg_speeds['backward'],
                     'congestion_level': congestion_pct,
                     'time_elapsed': elapsed_time,
-                    'median_position': actual_median_pos,  # Real-time position during animation
-                    'median_target': median.target_offset,  # Target position
+                    'median_position': actual_median_pos, 
+                    'median_target': median.target_offset,
                     'is_moving': median.is_moving,
                     'lane_data': {
                         'forward': lane_counts['forward'],
                         'backward': lane_counts['backward']
                     },
-                    'last_update': time.time()  # Timestamp for staleness detection
+                    'last_update': time.time()  
                 }
                 state_file = os.path.join(os.path.dirname(__file__), 'simulation_state.json')
                 with open(state_file, 'w') as f:
-                    json.dump(state_data, f, indent=2)  # Pretty print for debugging
+                    json.dump(state_data, f, indent=2)  
             except Exception as e:
                 print(f"Error exporting state: {e}")
             
@@ -1379,7 +1364,7 @@ def main():
             
             pygame.event.pump()
             
-            if elapsed_time > 300:  # 5 minutes
+            if elapsed_time > 300: 
                 print("\nSimulation time limit reached (5 minutes)")
                 break
 
@@ -1400,7 +1385,7 @@ def main():
         improved_capacity = int(200 * (4/3))
         
         baseline_volume = 200 + random.randint(20, 50)
-        improved_volume = baseline_volume  # Same demand, but with 4-lane configuration
+        improved_volume = baseline_volume 
         
         print(f"Simulation Data Collected:")
         print(f"   Total Duration: {elapsed_time:.1f} seconds")
@@ -1461,7 +1446,7 @@ def main():
         print(f"   Time Saved (T - T'): {trip_time_saved_minutes:.2f} minutes ({trip_time_improvement:.1f}% reduction)")
         print()
         
-        # Set placeholder values for fuel metrics (not displayed but saved to JSON)
+        # Set placeholder values for fuel metrics
         baseline_fuel = {
             'idle_fuel_L': 0,
             'cruise_fuel_L': 0,
