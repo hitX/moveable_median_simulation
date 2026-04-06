@@ -64,7 +64,7 @@ Download CARLA 0.9.15 from [official website](https://github.com/carla-simulator
 
 ### 2. Clone Repository
 ```bash
-git clone https://github.com/yourusername/dynamic-median-traffic.git
+git clone https://github.com/hitX/dynamic-median-traffic.git
 cd dynamic-median-traffic
 ```
 
