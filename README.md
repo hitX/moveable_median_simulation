@@ -9,13 +9,13 @@ An intelligent traffic management system that dynamically adjusts highway lane c
 ![CARLA Simulation](images/simulation_screenshot.png)
 *Real-time traffic simulation in CARLA showing the dynamic median traffic management system*
 
-## 🎯 Overview
+## Overview
 
 Traditional highway infrastructure suffers from directional traffic imbalances—morning rush hours congest one direction while the opposite remains empty, and vice versa in the evening. This system solves that problem by:
 
 ---
 
-## 🚀 Features
+## Features
 
 ### Core Functionality
 - **Intelligent Congestion Detection**: Monitors vehicle speeds and counts in real-time
@@ -33,7 +33,7 @@ Traditional highway infrastructure suffers from directional traffic imbalances�
 
 ---
 
-## 📋 Requirements
+## Requirements
 
 ### Software Dependencies
 ```
@@ -51,7 +51,7 @@ numpy (optional, for advanced analysis)
 
 ---
 
-## 🔧 Installation
+## Installation
 
 ### 1. Install CARLA Simulator
 Download CARLA 0.9.15 from [official website](https://github.com/carla-simulator/carla/releases/tag/0.9.15)
@@ -85,7 +85,7 @@ pip install carla==0.9.15 pygame==2.5.2 flask==3.0.0
 
 ---
 
-## 🎮 Quick Start
+## Quick Start
 
 ### 1. Start CARLA Simulator
 ```bash
@@ -113,7 +113,7 @@ Then open `http://localhost:5000` in your browser.
 
 ---
 
-## 📊 Usage
+## Usage
 
 ### Basic Simulation
 The simulation runs automatically and will:
@@ -136,7 +136,7 @@ The simulation runs automatically and will:
 
 ---
 
-## 📈 Performance Metrics
+## Performance Metrics
 
 The system calculates and tracks:
 
@@ -151,7 +151,7 @@ Where:
 - C = Capacity (200 baseline, 267 improved)
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 median_3d/
@@ -172,7 +172,7 @@ median_3d/
 
 ---
 
-## 🔬 Technical Details
+## Technical Details
 
 ### BPR Function Implementation
 The Bureau of Public Roads function calculates trip time based on traffic volume and capacity:
@@ -186,7 +186,7 @@ The Bureau of Public Roads function calculates trip time based on traffic volume
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 Detailed documentation available:
 
@@ -196,33 +196,3 @@ Detailed documentation available:
 - **[QUICK_START.md](QUICK_START.md)** - Step-by-step user guide
 
 ---
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👥 Authors
-
-**Mohamed Eltahawy**
-
----
-
-## 🙏 Acknowledgments
-
-- **CARLA Team** - Open-source autonomous driving simulator
-- **National Academy of Engineering** - Grand Challenges inspiration
-- **Texas A&M Transportation Institute** - Traffic congestion research data
-- **Bureau of Public Roads** - BPR function methodology
-
----
-
-
-## 🔗 Links
-
-- [CARLA Simulator](https://carla.org/)
-
----
-
-**⭐ Star this repository if you find it helpful!**
